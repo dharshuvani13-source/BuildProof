@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -20,7 +21,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function Header() {
-  const { user, loading } = useUser();
+  const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
@@ -30,6 +31,7 @@ export default function Header() {
   }, []);
 
   const logout = async () => {
+    if (!auth) return;
     await signOut(auth);
     router.push('/login');
   };
@@ -72,7 +74,7 @@ export default function Header() {
           </nav>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
-          {loading ? (
+          {isUserLoading ? (
             <Skeleton className="h-8 w-20 rounded-md" />
           ) : user ? (
             <DropdownMenu>

@@ -1,3 +1,4 @@
+
 'use client';
 import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
@@ -8,16 +9,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 export default function ProfilePage() {
-    const { user, loading } = useUser();
+    const { user, isUserLoading } = useUser();
     const router = useRouter();
 
     useEffect(() => {
-        if (!loading && !user) {
+        if (!isUserLoading && !user) {
             router.push('/login');
         }
-    }, [user, loading, router]);
+    }, [user, isUserLoading, router]);
 
-    if (loading || !user) {
+    if (isUserLoading || !user) {
         return (
             <div className="flex h-screen items-center justify-center">
                 <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />

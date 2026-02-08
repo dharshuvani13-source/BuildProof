@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from "next/link"
@@ -46,6 +47,7 @@ export default function SignupPage() {
 
     function onSubmit(values: z.infer<typeof SignupSchema>) {
         startTransition(async () => {
+            if (!auth) return;
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
                 await updateProfile(userCredential.user, { displayName: values.name });

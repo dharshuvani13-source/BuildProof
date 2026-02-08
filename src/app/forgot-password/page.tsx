@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from "next/link";
@@ -28,6 +29,7 @@ export default function ForgotPasswordPage() {
 
     const onSubmit = (values: z.infer<typeof ForgotPasswordSchema>) => {
         startTransition(async () => {
+            if (!auth) return;
             try {
                 await sendPasswordResetEmail(auth, values.email);
                 toast({

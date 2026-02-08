@@ -2,21 +2,21 @@
   "placeholderImages": [
     {
       "id": "team-1",
-      "description": "Portrait of Dharshini, Lead Developer",
-      "imageUrl": "https://images.unsplash.com/photo-1580894908361-967195033215?q=80&w=1080",
-      "imageHint": "woman developer"
+      "description": "Portrait of a woman with hidden face",
+      "imageUrl": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1080",
+      "imageHint": "woman portrait"
     },
     {
       "id": "team-2",
-      "description": "Portrait of Deepika, UX/UI Designer",
-      "imageUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1080",
-      "imageHint": "woman smiling"
+      "description": "Portrait of a person working on a laptop",
+      "imageUrl": "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=1080",
+      "imageHint": "person laptop"
     },
     {
       "id": "team-3",
-      "description": "Portrait of Iswarya, Frontend Engineer",
-      "imageUrl": "https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=1080",
-      "imageHint": "woman office"
+      "description": "Portrait of a person in a meeting",
+      "imageUrl": "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1080",
+      "imageHint": "person meeting"
     },
     {
       "id": "hero-linkedin",

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from "react-hook-form";
@@ -11,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { sendContactMessage } from "@/app/actions/contact.actions";
 import { Mail, MessageSquare, User } from "lucide-react";
+import { useFirestore } from "@/firebase";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 
 const ContactSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -21,6 +24,7 @@ const ContactSchema = z.object({
 export default function ContactPage() {
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
+  const firestore = useFirestore();
 
   const form = useForm<z.infer<typeof ContactSchema>>({
     resolver: zodResolver(ContactSchema),
@@ -29,12 +33,17 @@ export default function ContactPage() {
 
   const onSubmit = (values: z.infer<typeof ContactSchema>) => {
     startTransition(async () => {
-      const result = await sendContactMessage(values);
-      if (result.success) {
+      try {
+        const contactMessagesCollection = collection(firestore, 'contactMessages');
+        await addDoc(contactMessagesCollection, {
+            ...values,
+            sentAt: serverTimestamp(),
+        });
         toast({ title: "Message Sent!", description: "Thank you for contacting us. We'll get back to you shortly." });
         form.reset();
-      } else {
-        toast({ title: "Error", description: result.message, variant: "destructive" });
+      } catch (error) {
+        console.error("Contact form error:", error);
+        toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
       }
     });
   };

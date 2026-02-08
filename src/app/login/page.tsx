@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from "next/link"
@@ -44,6 +45,7 @@ export default function LoginPage() {
 
   function onSubmit(values: z.infer<typeof LoginSchema>) {
     startTransition(async () => {
+        if (!auth) return;
         try {
             await signInWithEmailAndPassword(auth, values.email, values.password);
             toast({ title: "Login successful!" });
