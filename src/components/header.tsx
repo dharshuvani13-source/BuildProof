@@ -15,9 +15,15 @@ import {
 import { Home, LogOut, PlusCircle, User } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 import Logo from './logo';
+import { useEffect, useState } from 'react';
 
 export default function Header() {
   const { user, loading, logout } = useAuth();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -29,7 +35,7 @@ export default function Header() {
           </Link>
           <nav className="hidden items-center gap-6 text-sm md:flex">
             <Link
-              href={user ? "/dashboard" : "/"}
+              href={isClient && user ? "/dashboard" : "/"}
               className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
               Home
