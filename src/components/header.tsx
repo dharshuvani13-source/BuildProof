@@ -28,14 +28,12 @@ export default function Header() {
             <span className="font-bold sm:inline-block">SkillProof</span>
           </Link>
           <nav className="hidden items-center gap-6 text-sm md:flex">
-            {user && (
-               <Link
-                href="/dashboard"
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
-              >
-                Home
-              </Link>
-            )}
+            <Link
+              href={user ? "/dashboard" : "/"}
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              Home
+            </Link>
              <Link
               href="/contact"
               className="transition-colors hover:text-foreground/80 text-foreground/60"
