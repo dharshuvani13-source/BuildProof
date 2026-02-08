@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LayoutGrid, LogOut, PlusCircle, User } from 'lucide-react';
+import { Home, LogOut, PlusCircle, User } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 import Logo from './logo';
 
@@ -33,7 +33,7 @@ export default function Header() {
                 href="/dashboard"
                 className="transition-colors hover:text-foreground/80 text-foreground/60"
               >
-                Dashboard
+                Home
               </Link>
             )}
              <Link
@@ -69,8 +69,8 @@ export default function Header() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard">
-                    <LayoutGrid className="mr-2 h-4 w-4" />
-                    <span>Dashboard</span>
+                    <Home className="mr-2 h-4 w-4" />
+                    <span>Home</span>
                   </Link>
                 </DropdownMenuItem>
                  <DropdownMenuItem asChild>
