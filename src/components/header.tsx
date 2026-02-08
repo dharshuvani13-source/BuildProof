@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Home, LogOut, PlusCircle, User as UserIcon } from 'lucide-react';
+import { Edit, LogOut, User as UserIcon } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 import Logo from './logo';
 import { useEffect, useState } from 'react';
@@ -97,21 +97,15 @@ export default function Header() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard">
-                    <Home className="mr-2 h-4 w-4" />
-                    <span>Home</span>
+                  <Link href="/profile">
+                    <UserIcon className="mr-2 h-4 w-4" />
+                    <span>View Profile</span>
                   </Link>
                 </DropdownMenuItem>
                  <DropdownMenuItem asChild>
-                  <Link href="/submit-proof">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    <span>Submit Proof</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
                   <Link href="/profile">
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
+                    <Edit className="mr-2 h-4 w-4" />
+                    <span>Edit Profile</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

@@ -87,6 +87,11 @@
         "peerValidationCount": {
           "type": "number",
           "description": "Number of peer validations received."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of when the proof was created."
         }
       },
       "required": [
@@ -97,7 +102,8 @@
         "description",
         "githubRepoLink",
         "screenshotUrls",
-        "peerValidationCount"
+        "peerValidationCount",
+        "createdAt"
       ]
     },
     "ContactMessage": {

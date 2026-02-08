@@ -13,7 +13,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 
 const ProofSchema = z.object({
   skillName: z.string().min(2, { message: 'Skill name is required.' }),
@@ -58,6 +58,7 @@ export default function SubmitProofPage() {
                 userId: user.uid,
                 peerValidationCount: 0,
                 screenshotUrls: screenshotUrls,
+                createdAt: serverTimestamp(),
             };
 
             const skillProofsCollection = collection(firestore, `users/${user.uid}/skillProofs`);

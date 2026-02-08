@@ -6,20 +6,25 @@ import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { collection } from 'firebase/firestore';
-import { PlusCircle, ThumbsUp, ArrowRight } from 'lucide-react';
+import { collection, Timestamp } from 'firebase/firestore';
+import { PlusCircle, ThumbsUp, ArrowRight, Share2, Calendar } from 'lucide-react';
+import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 interface SkillProof {
   id: string;
   skillName: string;
   projectTitle: string;
   peerValidationCount: number;
+  createdAt: Timestamp;
+  userId: string;
 }
 
 export default function DashboardPage() {
     const { user, isUserLoading } = useUser();
     const router = useRouter();
     const firestore = useFirestore();
+    const { toast } = useToast();
 
     const skillProofsQuery = useMemoFirebase(() => {
         if (!user || !firestore) return null;
@@ -33,6 +38,17 @@ export default function DashboardPage() {
             router.push('/login');
         }
     }, [user, isUserLoading, router]);
+
+    const handleShare = (proofId: string) => {
+        if (!user) return;
+        const url = `${window.location.origin}/proof/${proofId}?userId=${user.uid}`;
+        navigator.clipboard.writeText(url).then(() => {
+            toast({
+                title: "Link Copied!",
+                description: "The proof link has been copied to your clipboard.",
+            });
+        });
+    };
 
     const isLoading = isUserLoading || areProofsLoading;
 
@@ -59,21 +75,33 @@ export default function DashboardPage() {
             {skillProofs && skillProofs.length > 0 ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {skillProofs.map((proof) => (
-                        <Card key={proof.id} className="bg-white/30 backdrop-blur-lg border-white/20 shadow-lg flex flex-col">
+                        <Card key={proof.id} className="bg-white/30 backdrop-blur-lg border-white/20 shadow-lg flex flex-col rounded-2xl">
                             <CardHeader>
                                 <CardTitle>{proof.skillName}</CardTitle>
                                 <CardDescription>{proof.projectTitle}</CardDescription>
                             </CardHeader>
-                            <CardContent className="flex-grow flex flex-col justify-between">
-                                <div className="flex items-center gap-2 text-muted-foreground mb-4">
-                                    <ThumbsUp className="h-4 w-4" />
-                                    <span>{proof.peerValidationCount} Validations</span>
+                            <CardContent className="flex-grow flex flex-col justify-between space-y-4">
+                               <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                                        <ThumbsUp className="h-4 w-4" />
+                                        <span>{proof.peerValidationCount} Validations</span>
+                                    </div>
+                                     <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                                        <Calendar className="h-4 w-4" />
+                                        <span>{proof.createdAt ? format(proof.createdAt.toDate(), 'PPP') : 'Date not available'}</span>
+                                    </div>
+                               </div>
+                                <div className="flex flex-col sm:flex-row gap-2 mt-auto">
+                                     <Button asChild variant="outline" className="w-full">
+                                        <Link href={`/proof/${proof.id}?userId=${proof.userId}`}>
+                                            View Proof <ArrowRight className="ml-2 h-4 w-4" />
+                                        </Link>
+                                    </Button>
+                                    <Button variant="outline" className="w-full" onClick={() => handleShare(proof.id)}>
+                                        <Share2 className="mr-2 h-4 w-4" />
+                                        Share Link
+                                    </Button>
                                 </div>
-                                <Button asChild variant="outline" className="mt-auto w-full">
-                                    <Link href={`/proof/${proof.id}?userId=${user.uid}`}>
-                                        View Proof <ArrowRight className="ml-2 h-4 w-4" />
-                                    </Link>
-                                </Button>
                             </CardContent>
                         </Card>
                     ))}
