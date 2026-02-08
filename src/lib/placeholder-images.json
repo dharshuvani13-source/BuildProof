@@ -2,19 +2,19 @@
   "placeholderImages": [
     {
       "id": "team-1",
-      "description": "Portrait of a woman with hidden face",
+      "description": "Portrait of Dharshini, Lead Developer",
       "imageUrl": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1080",
       "imageHint": "woman portrait"
     },
     {
       "id": "team-2",
-      "description": "Portrait of a person working on a laptop",
+      "description": "Portrait of Deepika, UX/UI Designer",
       "imageUrl": "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=1080",
       "imageHint": "person laptop"
     },
     {
       "id": "team-3",
-      "description": "Portrait of a person in a meeting",
+      "description": "Portrait of Iswarya, Frontend Engineer",
       "imageUrl": "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1080",
       "imageHint": "person meeting"
     },
