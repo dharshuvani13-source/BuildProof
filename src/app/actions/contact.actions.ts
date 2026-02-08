@@ -1,8 +1,9 @@
 'use server';
 
 import { z } from 'zod';
-import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { initializeFirebase, useFirestore, useFirebaseApp } from '@/firebase';
+import { collection, addDoc, serverTimestamp, getFirestore } from 'firebase/firestore';
+import { firebaseConfig } from '@/firebase/config';
 
 const ContactSchema = z.object({
   name: z.string().min(2),
@@ -18,6 +19,8 @@ export async function sendContactMessage(values: z.infer<typeof ContactSchema>) 
     }
 
     try {
+        const { firebaseApp } = initializeFirebase(firebaseConfig);
+        const db = getFirestore(firebaseApp);
         await addDoc(collection(db, 'messages'), {
             ...validatedFields.data,
             createdAt: serverTimestamp(),

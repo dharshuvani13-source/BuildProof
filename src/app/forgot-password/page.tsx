@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useTransition } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { useAuth } from "@/firebase";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ const ForgotPasswordSchema = z.object({
 
 export default function ForgotPasswordPage() {
     const { toast } = useToast();
+    const auth = useAuth();
     const [isPending, startTransition] = useTransition();
 
     const form = useForm<z.infer<typeof ForgotPasswordSchema>>({

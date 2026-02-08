@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { useState, useTransition } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { useAuth } from "@/firebase";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -30,6 +30,7 @@ const LoginSchema = z.object({
 export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const auth = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = useTransition();
 

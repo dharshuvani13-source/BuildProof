@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/hooks/useAuth';
+import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { CheckCircle, UploadCloud, Share2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function DashboardPage() {
-    const { user, loading } = useAuth();
+    const { user, loading } = useUser();
     const router = useRouter();
 
     useEffect(() => {

@@ -1,0 +1,204 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the SkillProof platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "hashedPassword": {
+          "type": "string",
+          "description": "Hashed password of the user. Stored securely after hashing."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "First name of the user."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Last name of the user."
+        },
+        "otpSecret": {
+          "type": "string",
+          "description": "Secret key used for OTP generation. This is sensitive; handle with care."
+        },
+        "isEmailVerified": {
+          "type": "boolean",
+          "description": "Indicates if the user's email address has been verified."
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "hashedPassword",
+        "firstName",
+        "lastName",
+        "otpSecret",
+        "isEmailVerified"
+      ]
+    },
+    "SkillProof": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SkillProof",
+      "type": "object",
+      "description": "Represents a skill proof submitted by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the skill proof."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User who submitted this skill proof. (Relationship: User 1:N SkillProof)"
+        },
+        "skillName": {
+          "type": "string",
+          "description": "Name of the skill being proven."
+        },
+        "projectTitle": {
+          "type": "string",
+          "description": "Title of the project used as evidence."
+        },
+        "description": {
+          "type": "string",
+          "description": "Short description of the project and skill."
+        },
+        "githubRepoLink": {
+          "type": "string",
+          "description": "Link to the GitHub repository of the project.",
+          "format": "uri"
+        },
+        "screenshotUrls": {
+          "type": "array",
+          "description": "URLs of the screenshots uploaded as evidence.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "peerValidationCount": {
+          "type": "number",
+          "description": "Number of peer validations received."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "skillName",
+        "projectTitle",
+        "description",
+        "githubRepoLink",
+        "screenshotUrls",
+        "peerValidationCount"
+      ]
+    },
+    "ContactMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ContactMessage",
+      "type": "object",
+      "description": "Represents a message submitted through the Contact Us form.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the contact message."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the person sending the message."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the person sending the message.",
+          "format": "email"
+        },
+        "message": {
+          "type": "string",
+          "description": "The message content."
+        },
+        "sentAt": {
+          "type": "string",
+          "description": "Timestamp when the message was sent.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "message",
+        "sentAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles. Uses path-based ownership for data privacy.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/skillProofs/{skillProofId}",
+        "definition": {
+          "entityName": "SkillProof",
+          "schema": {
+            "$ref": "#/backend/entities/SkillProof"
+          },
+          "description": "Stores skill proofs submitted by users. Organized as a subcollection of users, ensuring path-based ownership. Includes denormalized 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "skillProofId",
+              "description": "The unique identifier for the skill proof."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/contactMessages/{contactMessageId}",
+        "definition": {
+          "entityName": "ContactMessage",
+          "schema": {
+            "$ref": "#/backend/entities/ContactMessage"
+          },
+          "description": "Stores messages submitted through the Contact Us form.",
+          "params": [
+            {
+              "name": "contactMessageId",
+              "description": "The unique identifier for the contact message."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to provide a secure, scalable, and easily maintainable data model for the SkillProof application, focusing on authorization independence and clear access patterns. User data and skill proofs are stored in separate collections to maintain a homogeneous security posture. The `SkillProof` documents are stored as subcollections of the `users` collection, ensuring path-based ownership. This eliminates the need for complex `get()` calls in security rules, promoting atomic operations and straightforward debugging. Contact messages are stored in a separate top-level collection because their security requirements differ. This ensures that the structure supports the required QAPs (rules are not filters) by segregating data based on access control needs."
+  }
+}

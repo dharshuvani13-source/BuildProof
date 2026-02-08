@@ -1,0 +1,102 @@
+/**
+ * Core Philosophy: This ruleset enforces a strict user-ownership model where users have full control over their own data but cannot access, view, or modify the data of other users. The principle of least privilege is applied throughout.
+ *
+ * Data Structure: All user-specific data, including profiles (`/users/{userId}`) and their skill proofs (`/users/{userId}/skillProofs/{skillProofId}`), is nested under a path containing the user's unique ID. This hierarchical structure enables simple, performant, and secure path-based authorization. A separate top-level collection (`/contactMessages`) is used for public form submissions, which have distinct "write-only" security needs.
+ *
+ * Key Security Decisions:
+ * - Strict User Scoping: Users can only read and write data within their own document tree (e.g., `/users/{their-own-userId}/...`). Listing other users or their content is explicitly disallowed.
+ * - Path-Based Authorization: Rules rely on the `{userId}` wildcard in the path to grant access, which is highly performant as it avoids extra database reads (`get()` calls).
+ * - Write-Only "Drop Box" for Contact Messages: The `/contactMessages` collection allows anyone to create a document (submit a form), but no client is permitted to read, update, or delete these messages. This is a common and secure pattern for public submission forms.
+ * - Relational Integrity: On document creation, rules enforce that denormalized ownership fields (like `userId` within a `SkillProof` document) correctly match the user ID from the document path, ensuring data consistency.
+ *
+ * Denormalization for Authorization:
+ * The `SkillProof` entity contains a `userId` field. This is a critical denormalization that allows the security rules for the `/users/{userId}/skillProofs/{skillProofId}` path to validate ownership without needing to perform a costly `get()` on the parent user document. The rules enforce that this `userId` field is set correctly on creation and cannot be changed on update.
+ *
+ * Structural Segregation:
+ * The separation of user-centric data (`/users`) from public-submission data (`/contactMessages`) into different top-level collections is a deliberate structural choice. It allows for two completely different security models to coexist without conflict. The `/users` collection is private and owner-only, while the `/contactMessages` collection is a public "drop-box".
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for readable and reusable logic
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Checks if the requesting user's UID matches the document's owner ID
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Checks for ownership on an existing document. Prevents writes to non-existent paths.
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    // Ensures the user's ID is correctly set in the document on creation.
+    function createsOwnProfile(userId) {
+      return request.resource.data.id == userId;
+    }
+
+    // Prevents the user's ID from being changed after creation.
+    function idIsImmutable() {
+      return request.resource.data.id == resource.data.id;
+    }
+
+    // Ensures the skill proof's userId field matches the path on creation.
+    function createsOwnSkillProof(userId) {
+      return request.resource.data.userId == userId;
+    }
+
+    // Prevents the skill proof's userId from being changed after creation.
+    function userIdIsImmutable() {
+      return request.resource.data.userId == resource.data.userId;
+    }
+
+    /**
+     * @description Controls access to user profile documents.
+     * @path /users/{userId}
+     * @allow (create) An authenticated user creating their own user document for the first time.
+     * @deny  (get) An authenticated user (`user-abc`) trying to read another user's (`user-xyz`) profile.
+     * @principle Restricts access to a user's own data tree.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && createsOwnProfile(userId);
+      allow update: if isExistingOwner(userId) && idIsImmutable();
+      allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Controls access to a user's skill proof documents.
+       * @path /users/{userId}/skillProofs/{skillProofId}
+       * @allow (create) An authenticated user (`user-abc`) creating a skill proof under their own path (`/users/user-abc/...`).
+       * @deny  (update) An authenticated user (`user-abc`) trying to update a skill proof for another user (`/users/user-xyz/...`).
+       * @principle Enforces document ownership for all operations and validates relational integrity.
+       */
+      match /skillProofs/{skillProofId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && createsOwnSkillProof(userId);
+        allow update: if isExistingOwner(userId) && userIdIsImmutable();
+        allow delete: if isExistingOwner(userId);
+      }
+    }
+
+    /**
+     * @description A "write-only" collection for public contact form submissions.
+     * @path /contactMessages/{contactMessageId}
+     * @allow (create) Any user, authenticated or not, submitting a new contact message.
+     * @deny  (list) Any user trying to read the list of submitted messages.
+     * @principle Implements a secure "drop-box" pattern where data can be submitted but not read or modified by clients.
+     */
+    match /contactMessages/{contactMessageId} {
+      allow get: if false;
+      allow list: if false;
+      allow create: if true;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

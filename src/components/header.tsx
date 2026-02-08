@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useAuth } from '@/hooks/useAuth';
+import { useUser, useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -12,20 +13,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Home, LogOut, PlusCircle, User } from 'lucide-react';
+import { Home, LogOut, PlusCircle, User as UserIcon } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 import Logo from './logo';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function Header() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useUser();
+  const auth = useAuth();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  const logout = async () => {
+    await signOut(auth);
+    router.push('/login');
+  };
 
   const getInitials = () => {
     if (!user) return '';
@@ -101,7 +108,7 @@ export default function Header() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/profile">
-                    <User className="mr-2 h-4 w-4" />
+                    <UserIcon className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </Link>
                 </DropdownMenuItem>
