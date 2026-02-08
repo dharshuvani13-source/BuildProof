@@ -1,8 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { CheckCircle, UploadCloud, Share2 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function Home() {
+  const heroImage = PlaceHolderImages.find((img) => img.id === 'hero-linkedin');
   return (
     <div className="flex flex-col items-center">
       <section className="w-full py-20 md:py-32 lg:py-40">
@@ -27,22 +30,20 @@ export default function Home() {
               </div>
             </div>
             <div className="flex justify-center">
-                <div className="relative w-full max-w-md">
-                    <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full filter blur-2xl opacity-70 animate-blob"></div>
-                    <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-accent/20 rounded-full filter blur-2xl opacity-70 animate-blob animation-delay-2000"></div>
-                    <div className="relative bg-white/30 backdrop-blur-lg rounded-2xl border border-white/20 shadow-lg p-8">
-                        <h3 className="text-2xl font-bold mb-4">React.js Expert</h3>
-                        <p className="text-sm text-muted-foreground mb-2">Project: E-commerce Platform</p>
-                        <div className="w-full h-4 bg-gray-200 rounded-full mb-4">
-                            <div className="w-3/4 h-full text-center text-xs text-white bg-primary rounded-full"></div>
-                        </div>
-                         <p className="text-sm text-muted-foreground mb-2">Peer Validations: 12</p>
-                         <div className="flex items-center">
-                            <CheckCircle className="text-green-500 mr-2" />
-                            <span>Validated Skill</span>
-                         </div>
-                    </div>
-                </div>
+              <div className="relative w-full max-w-2xl">
+                <div className="absolute -top-10 -left-10 h-40 w-40 animate-blob rounded-full bg-primary/20 opacity-70 filter blur-2xl"></div>
+                <div className="animation-delay-2000 absolute -bottom-10 -right-10 h-40 w-40 animate-blob rounded-full bg-accent/20 opacity-70 filter blur-2xl"></div>
+                {heroImage && (
+                  <Image
+                    src={heroImage.imageUrl}
+                    alt={heroImage.description}
+                    width={1200}
+                    height={800}
+                    className="relative rounded-2xl border border-white/20 shadow-lg"
+                    data-ai-hint={heroImage.imageHint}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -59,11 +60,11 @@ export default function Home() {
               </p>
             </div>
           </div>
-          <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-3 lg:gap-16 mt-12">
+          <div className="mx-auto mt-12 grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-3 lg:gap-16">
             <div className="grid gap-1 text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/20">
-                    <UploadCloud className="h-8 w-8 text-primary" />
-                </div>
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/20">
+                <UploadCloud className="h-8 w-8 text-primary" />
+              </div>
               <h3 className="text-xl font-bold">1. Submit Your Project</h3>
               <p className="text-sm text-muted-foreground">
                 Upload your project details, including title, description, GitHub link, and screenshots as concrete evidence of your skill.
@@ -71,7 +72,7 @@ export default function Home() {
             </div>
             <div className="grid gap-1 text-center">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent/20">
-                  <Share2 className="h-8 w-8 text-accent" />
+                <Share2 className="h-8 w-8 text-accent" />
               </div>
               <h3 className="text-xl font-bold">2. Get a Shareable Proof</h3>
               <p className="text-sm text-muted-foreground">
@@ -80,7 +81,7 @@ export default function Home() {
             </div>
             <div className="grid gap-1 text-center">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20">
-                  <CheckCircle className="h-8 w-8 text-green-500" />
+                <CheckCircle className="h-8 w-8 text-green-500" />
               </div>
               <h3 className="text-xl font-bold">3. Receive Validations</h3>
               <p className="text-sm text-muted-foreground">

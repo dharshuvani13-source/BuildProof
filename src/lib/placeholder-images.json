@@ -17,6 +17,12 @@
       "description": "Portrait of Sam Chen, Frontend Engineer",
       "imageUrl": "https://images.unsplash.com/flagged/photo-1595514191830-3e96a518989b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGVyc29uJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzcwNDYyNjA2fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "person portrait"
+    },
+    {
+      "id": "hero-linkedin",
+      "description": "LinkedIn scroll page on a PC",
+      "imageUrl": "https://images.unsplash.com/photo-1746014600751-831d8d49efaa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxsaW5rZWRpbiUyMHBhZ2V8ZW58MHx8fHwxNzcwNTQ2MDg3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "linkedin page"
     }
   ]
 }
