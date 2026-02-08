@@ -71,12 +71,13 @@ service cloud.firestore {
       /**
        * @description Controls access to a user's skill proof documents.
        * @path /users/{userId}/skillProofs/{skillProofId}
-       * @allow (create) An authenticated user (`user-abc`) creating a skill proof under their own path (`/users/user-abc/...`).
+       * @allow (get) ANYONE can read a specific skill proof, making it public.
+       * @allow (list) An authenticated user (`user-abc`) listing their own skill proofs (`/users/user-abc/...`).
        * @deny  (update) An authenticated user (`user-abc`) trying to update a skill proof for another user (`/users/user-xyz/...`).
-       * @principle Enforces document ownership for all operations and validates relational integrity.
+       * @principle Enforces document ownership for CUD operations and validates relational integrity, while allowing public reads.
        */
       match /skillProofs/{skillProofId} {
-        allow get: if isOwner(userId);
+        allow get: if true;
         allow list: if isOwner(userId);
         allow create: if isOwner(userId) && createsOwnSkillProof(userId);
         allow update: if isExistingOwner(userId) && userIdIsImmutable();

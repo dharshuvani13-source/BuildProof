@@ -1,38 +1,59 @@
+'use client';
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Github, ThumbsUp, CheckCircle } from "lucide-react";
+import { Github, ThumbsUp, CheckCircle, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import Image from 'next/image';
+import { useParams, useSearchParams } from 'next/navigation';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc } from "firebase/firestore";
 
-// This is a placeholder function to get proof data. In a real app, this would fetch from Firestore.
-async function getProofData(id: string) {
-    if (id === 'example') {
-        return {
-            id: 'example',
-            skillName: 'Next.js Development',
-            projectTitle: 'Portfolio Website',
-            description: 'Developed a personal portfolio website using Next.js, TypeScript, and Tailwind CSS. Features include server-side rendering, dynamic routing, and a blog section with Markdown support.',
-            githubLink: 'https://github.com/example/portfolio',
-            screenshots: ['https://picsum.photos/seed/proof-1/800/600'],
-            validationCount: 27,
-            authorEmail: 'developer@example.com'
-        };
-    }
-    return null;
+interface SkillProof {
+    id: string;
+    skillName: string;
+    projectTitle: string;
+    description: string;
+    githubRepoLink: string;
+    screenshotUrls: string[];
+    peerValidationCount: number;
+    userId: string;
 }
 
+export default function ProofPage() {
+    const params = useParams();
+    const searchParams = useSearchParams();
+    const firestore = useFirestore();
 
-export default async function ProofPage({ params }: { params: { id: string } }) {
-    const proof = await getProofData(params.id);
+    const proofId = params.id as string;
+    const userId = searchParams.get('userId');
 
-    if (!proof) {
-        // In a real app, you would fetch and if not found, call notFound().
-        // For this demo, we'll show a message for non-example IDs.
+    const proofDocRef = useMemoFirebase(() => {
+        if (!firestore || !userId || !proofId) return null;
+        return doc(firestore, `users/${userId}/skillProofs/${proofId}`);
+    }, [firestore, userId, proofId]);
+
+    const { data: proof, isLoading, error } = useDoc<SkillProof>(proofDocRef);
+    
+    if (isLoading) {
+        return (
+             <div className="flex h-screen items-center justify-center">
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            </div>
+        )
+    }
+
+    if (!proof || error) {
         return (
             <div className="text-center py-20">
-                <h1 className="text-2xl font-bold">Proof not found</h1>
+                <AlertTriangle className="mx-auto h-12 w-12 text-destructive" />
+                <h1 className="mt-4 text-2xl font-bold">Proof not found</h1>
                 <p className="text-muted-foreground">This skill proof does not exist or has been removed.</p>
-                <p className="mt-4">Try the <Link href="/proof/example" className="text-primary underline">example proof</Link>.</p>
+                <p className="mt-4">
+                    <Button asChild variant="outline">
+                        <Link href="/dashboard">Go to Dashboard</Link>
+                    </Button>
+                </p>
             </div>
         )
     }
@@ -58,21 +79,25 @@ export default async function ProofPage({ params }: { params: { id: string } }) 
 
                     <div>
                         <h3 className="text-xl font-semibold mb-2">Evidence</h3>
-                        <div className="rounded-lg overflow-hidden border">
-                            <Image
-                                src={proof.screenshots[0]}
-                                alt={`Screenshot for ${proof.projectTitle}`}
-                                width={800}
-                                height={600}
-                                className="w-full"
-                                data-ai-hint="website screenshot"
-                            />
-                        </div>
+                         {proof.screenshotUrls && proof.screenshotUrls.length > 0 ? (
+                            <div className="rounded-lg overflow-hidden border">
+                                <Image
+                                    src={proof.screenshotUrls[0]}
+                                    alt={`Screenshot for ${proof.projectTitle}`}
+                                    width={800}
+                                    height={600}
+                                    className="w-full"
+                                    data-ai-hint="website screenshot"
+                                />
+                            </div>
+                        ) : (
+                            <p className="text-muted-foreground">No screenshots provided.</p>
+                        )}
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-lg bg-muted/50 p-4">
                         <Button asChild variant="outline">
-                            <a href={proof.githubLink} target="_blank" rel="noopener noreferrer">
+                            <a href={proof.githubRepoLink} target="_blank" rel="noopener noreferrer">
                                 <Github className="mr-2 h-4 w-4" /> View on GitHub
                             </a>
                         </Button>
@@ -82,7 +107,7 @@ export default async function ProofPage({ params }: { params: { id: string } }) 
                                 Validate Skill
                             </Button>
                             <div className="text-center">
-                                <p className="text-2xl font-bold">{proof.validationCount}</p>
+                                <p className="text-2xl font-bold">{proof.peerValidationCount}</p>
                                 <p className="text-xs text-muted-foreground">Validations</p>
                             </div>
                         </div>

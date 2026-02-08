@@ -1,9 +1,8 @@
-
 'use client';
 
-import { useUser, useFirestore } from '@/firebase';
+import { useUser, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useTransition } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,8 +20,9 @@ const ProofSchema = z.object({
   projectTitle: z.string().min(2, { message: 'Project title is required.' }),
   description: z.string().min(10, { message: 'Description must be at least 10 characters.' }),
   githubRepoLink: z.string().url({ message: 'Please enter a valid URL.' }),
-  // screenshots: typeof window === 'undefined' ? z.any() : z.instanceof(FileList),
 });
+
+type ProofFormData = z.infer<typeof ProofSchema>;
 
 export default function SubmitProofPage() {
     const { user, isUserLoading } = useUser();
@@ -31,14 +31,13 @@ export default function SubmitProofPage() {
     const { toast } = useToast();
     const [isPending, startTransition] = useTransition();
 
-    const form = useForm({
+    const form = useForm<ProofFormData>({
         resolver: zodResolver(ProofSchema),
         defaultValues: {
             skillName: '',
             projectTitle: '',
             description: '',
             githubRepoLink: '',
-            // screenshots: undefined,
         },
     });
 
@@ -48,30 +47,36 @@ export default function SubmitProofPage() {
         }
     }, [user, isUserLoading, router]);
 
-    const onSubmit = (values: z.infer<typeof ProofSchema>) => {
-        if (!user) return;
+    const onSubmit = (values: ProofFormData) => {
+        if (!user || !firestore) return;
         
-        startTransition(async () => {
-            try {
-                // In a real app, you would handle file uploads to Firebase Storage
-                // and get the download URLs. For this demo, we'll use a placeholder.
-                const screenshotUrls = ['https://picsum.photos/seed/screenshot/800/600'];
+        startTransition(() => {
+            const screenshotUrls = ['https://picsum.photos/seed/screenshot/800/600'];
 
-                const skillProofsCollection = collection(firestore, 'skillProofs');
-                await addDoc(skillProofsCollection, {
-                    ...values,
-                    userId: user.uid,
-                    peerValidationCount: 0,
-                    screenshotUrls: screenshotUrls,
+            const dataToSave = {
+                ...values,
+                userId: user.uid,
+                peerValidationCount: 0,
+                screenshotUrls: screenshotUrls,
+            };
+
+            const skillProofsCollection = collection(firestore, `users/${user.uid}/skillProofs`);
+            
+            addDoc(skillProofsCollection, dataToSave)
+                .then(() => {
+                    toast({ title: 'Success!', description: 'Your skill proof has been submitted.' });
+                    router.push('/dashboard');
+                })
+                .catch((error) => {
+                    console.error('Error submitting proof:', error);
+                    const permissionError = new FirestorePermissionError({
+                        path: skillProofsCollection.path,
+                        operation: 'create',
+                        requestResourceData: dataToSave,
+                    });
+                    errorEmitter.emit('permission-error', permissionError);
+                    toast({ title: 'Error', description: 'There was a problem submitting your proof.', variant: 'destructive' });
                 });
-
-                toast({ title: 'Success!', description: 'Your skill proof has been submitted.' });
-                router.push('/dashboard');
-
-            } catch (error) {
-                console.error('Error submitting proof:', error);
-                toast({ title: 'Error', description: 'There was a problem submitting your proof.', variant: 'destructive' });
-            }
         });
     }
 
