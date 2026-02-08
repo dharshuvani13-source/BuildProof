@@ -8,6 +8,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { CheckCircle, UploadCloud, Share2 } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function DashboardPage() {
     const { user, loading } = useAuth();
@@ -28,6 +29,7 @@ export default function DashboardPage() {
     }
     
     const heroImage = PlaceHolderImages.find((img) => img.id === 'hero-linkedin');
+    const teamMembers = PlaceHolderImages.filter((img) => img.id.startsWith('team-'));
 
     return (
         <div className="flex flex-col items-center">
@@ -111,6 +113,44 @@ export default function DashboardPage() {
                 Peers and mentors can view your work and validate your skill, adding weight and credibility to your proof.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="w-full py-12 md:py-24 lg:py-32">
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
+            <div className="space-y-2">
+              <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Our Team</div>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-headline">Meet the Creators</h2>
+              <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                The passionate individuals who brought SkillProof to life.
+              </p>
+            </div>
+          </div>
+          <div className="mx-auto mt-12 grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-3 lg:gap-16">
+            {teamMembers.map((member) => {
+              const [name, role] = member.description.replace('Portrait of ', '').split(', ');
+              return (
+                <Card key={member.id} className="overflow-hidden text-center bg-white/30 backdrop-blur-lg border-white/20 shadow-lg">
+                  <CardContent className="p-0">
+                    <div className="relative h-48 w-full">
+                      <Image
+                        src={member.imageUrl}
+                        alt={member.description}
+                        fill
+                        className="object-cover"
+                        data-ai-hint={member.imageHint}
+                      />
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold">{name}</h3>
+                      <p className="text-sm text-muted-foreground">{role}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
