@@ -2,16 +2,12 @@
 
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-
-interface User {
-  uid: string;
-  email: string;
-}
+import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (user: User) => void;
   logout: () => void;
 }
 
@@ -23,33 +19,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem('skillproof_user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-    } catch (error) {
-      console.error('Failed to parse user from localStorage', error);
-      localStorage.removeItem('skillproof_user');
-    } finally {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
       setLoading(false);
-    }
+      if (user) {
+        // You can add logic here to redirect if the user is on a public page
+      } else {
+        // You can add logic here to redirect if the user is on a protected page
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
-  const login = (userData: User) => {
-    localStorage.setItem('skillproof_user', JSON.stringify(userData));
-    setUser(userData);
-    router.push('/dashboard');
-  };
-
-  const logout = useCallback(() => {
-    localStorage.removeItem('skillproof_user');
-    setUser(null);
+  const logout = useCallback(async () => {
+    await signOut(auth);
     router.push('/login');
   }, [router]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );

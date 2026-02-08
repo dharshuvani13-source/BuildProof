@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { useState, useTransition } from "react";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -19,9 +21,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
-import { signupUser } from "@/app/actions/auth.actions";
 
 const SignupSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
 })
@@ -35,6 +37,7 @@ export default function SignupPage() {
     const form = useForm<z.infer<typeof SignupSchema>>({
         resolver: zodResolver(SignupSchema),
         defaultValues: {
+            name: "",
             email: "",
             password: "",
         },
@@ -42,17 +45,25 @@ export default function SignupPage() {
 
     function onSubmit(values: z.infer<typeof SignupSchema>) {
         startTransition(async () => {
-            const result = await signupUser(values);
-            if (result.success && result.email) {
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+                await updateProfile(userCredential.user, { displayName: values.name });
+
                 toast({
                     title: "Account Created!",
-                    description: result.message,
+                    description: `Welcome, ${values.name}!`,
                 });
-                router.push(`/verify-email?email=${encodeURIComponent(result.email)}`);
-            } else {
+                router.push('/dashboard');
+            } catch (error: any) {
+                let errorMessage = "An unexpected error occurred.";
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = "This email is already registered. Please login.";
+                } else {
+                    errorMessage = error.message;
+                }
                 toast({
                     title: "Error",
-                    description: result.message,
+                    description: errorMessage,
                     variant: "destructive",
                 });
             }
@@ -73,6 +84,19 @@ export default function SignupPage() {
                 </div>
                 <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                          <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                              <Input placeholder="Your Name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                          </FormItem>
+                      )}
+                    />
                     <FormField
                     control={form.control}
                     name="email"

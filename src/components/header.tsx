@@ -16,14 +16,30 @@ import { Home, LogOut, PlusCircle, User } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 import Logo from './logo';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const { user, loading, logout } = useAuth();
+  const router = useRouter();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  const getInitials = () => {
+    if (!user) return '';
+    if (user.displayName) {
+      return user.displayName
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .substring(0, 2)
+        .toUpperCase();
+    }
+    return user.email?.[0].toUpperCase() ?? '';
+  };
+
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -57,7 +73,7 @@ export default function Header() {
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback>
-                      {user.email?.[0].toUpperCase()}
+                      {getInitials()}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
@@ -66,7 +82,7 @@ export default function Header() {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {user.email}
+                      {user.displayName || user.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>

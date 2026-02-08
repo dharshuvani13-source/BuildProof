@@ -1,10 +1,13 @@
 'use client';
 
 import Link from "next/link"
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { useState, useTransition } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -18,8 +21,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
-import { loginUser } from "@/app/actions/auth.actions";
-import { useAuth } from "@/hooks/useAuth";
 
 const LoginSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -28,7 +29,7 @@ const LoginSchema = z.object({
 
 export default function LoginPage() {
   const { toast } = useToast();
-  const { login } = useAuth();
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -42,14 +43,20 @@ export default function LoginPage() {
 
   function onSubmit(values: z.infer<typeof LoginSchema>) {
     startTransition(async () => {
-        const result = await loginUser(values);
-        if(result.success && result.user) {
+        try {
+            await signInWithEmailAndPassword(auth, values.email, values.password);
             toast({ title: "Login successful!" });
-            login(result.user);
-        } else {
+            router.push('/dashboard');
+        } catch (error: any) {
+            let errorMessage = "An unexpected error occurred.";
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                errorMessage = "Invalid email or password.";
+            } else {
+                errorMessage = error.message;
+            }
             toast({
                 title: "Error",
-                description: result.message,
+                description: errorMessage,
                 variant: "destructive",
             });
         }
