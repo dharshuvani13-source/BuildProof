@@ -4,12 +4,12 @@ import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig: FirebaseOptions = {
-  apiKey: "AIzaSyBV2sA8X3r7b-P9aKj6i_T_d5gYzVf8l7Y",
-  authDomain: "fb-studio-proj-7-dharshini.firebaseapp.com",
-  projectId: "fb-studio-proj-7-dharshini",
-  storageBucket: "fb-studio-proj-7-dharshini.appspot.com",
-  messagingSenderId: "358002166652",
-  appId: "1:358002166652:web:a668545833075ed5331d27"
+  projectId: "studio-9691021057-703fb",
+  appId: "1:133653110380:web:642fe15dc8a5f535248249",
+  apiKey: "AIzaSyA42njvkdre_OKvqxtwH1JA9g8Tw4JsJew",
+  authDomain: "studio-9691021057-703fb.firebaseapp.com",
+  storageBucket: "studio-9691021057-703fb.appspot.com",
+  messagingSenderId: "133653110380",
 };
 
 // Initialize Firebase
