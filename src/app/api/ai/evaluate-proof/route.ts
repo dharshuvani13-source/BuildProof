@@ -1,26 +1,23 @@
 import { NextResponse } from 'next/server';
+import { evaluateSkillProof } from '@/ai/flows';
 
 export async function POST(request: Request) {
-    const data = await request.json();
-    // Assume data contains the skill proof to evaluate
-    const score = evaluateSkillProof(data);
-    const reasoning = generateReasoning(data);
-    const recommendation = generateRecommendation(score);
+    try {
+        const data = await request.json();
+        if (!data.skillName || !data.projectTitle || !data.description || !data.githubRepoLink) {
+            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        }
 
-    return NextResponse.json({ score, reasoning, recommendation });
-}
+        const evaluation = await evaluateSkillProof({
+            skillName: data.skillName,
+            projectTitle: data.projectTitle,
+            description: data.description,
+            githubRepoLink: data.githubRepoLink,
+        });
 
-function evaluateSkillProof(data) {
-    // Logic for evaluating skill proof
-    return Math.floor(Math.random() * 100); // Example score
-}
-
-function generateReasoning(data) {
-    // Logic for generating reasoning
-    return 'This is a generated reasoning based on the skill proof.';
-}
-
-function generateRecommendation(score) {
-    // Logic for generating recommendation based on score
-    return score > 70 ? 'Good job! Keep it up!' : 'You might want to improve your skills.';
+        return NextResponse.json(evaluation, { status: 200 });
+    } catch (error) {
+        console.error('Evaluation error:', error);
+        return NextResponse.json({ error: 'Failed to evaluate proof', score: 70, reasoning: 'Proof submitted for manual review due to evaluation error.', recommendation: 'PENDING_REVIEW' }, { status: 500 });
+    }
 }
